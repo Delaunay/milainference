@@ -78,8 +78,8 @@ def server(args):
             process.kill()
 
     if jobid is not None and args.sync:
-        subprocess.run(f"touch slurm-{jobid}.out")
-        subprocess.run(f"tail -f slurm-{jobid}.out")
+        subprocess.run(["touch", f"slurm-{jobid}.out"])
+        subprocess.run(["tail", "-f", f"slurm-{jobid}.out"])
     else:
         print(jobid)
     
