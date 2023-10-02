@@ -56,7 +56,7 @@ if __name__ == "__main__":
         },
         entry_points={
             "console_scripts": [
-                "milainfer = milainference.core.cli",
+                "milainfer = milainference.core.cli:main",
             ],
         }
     )
