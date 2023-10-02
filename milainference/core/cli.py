@@ -77,7 +77,7 @@ def server(args):
             print("Stopping due to user interrupt")
             process.kill()
 
-    if args.sync:
+    if jobid is not None and args.sync:
         subprocess.run(f"touch slurm-{jobid}.out")
         subprocess.run(f"tail -f slurm-{jobid}.out")
     else:
