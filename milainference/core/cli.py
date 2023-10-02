@@ -7,6 +7,8 @@ import pkg_resources
 import openai
 
 from .client import init_client
+from .server_lookup import find_suitable_inference_server
+
 
 
 
@@ -19,10 +21,12 @@ def arguments():
     clt.add_argument("--prompt", type=str, help="Prompt")
     clt.add_argument("--short", action="store_true", help="Only print the result and nothing else")
 
-
     srv = subparser.add_parser("server", help="Launch an inference server")
     srv.add_argument("--model", type=str, help="Model name to start")
     srv.add_argument("--sync", action="store_true", help="Wait for the server to strt")
+
+    lst = subparser.add_parser("list", help="List all inference server available")
+    lst.add_argument("--model", type=str, help="Model name to start")
 
     return parser.parse_args()
 
@@ -50,7 +54,7 @@ def server(args):
     cmd = [
         'sbatch',
         sbatch_script,
-        args.model
+        args.model,
     ]
 
     jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
@@ -87,6 +91,14 @@ def server(args):
     return 0
 
 
+def listsrv(args):
+    """List all available server"""
+    servers = find_suitable_inference_server(args.model)
+
+    for s in servers:
+        print(f' - {s["host"]}:{s["port"]} => {s["model"]}')
+
+
 def nocmd(cmd):
     print("Command {cmd} is not recognized")
     return
@@ -98,6 +110,7 @@ def main():
     commands = {
         'client': client,
         'server': server,
+        'list': listsrv
     }
 
     cmd = vars(args).pop('cmd')

@@ -2,11 +2,16 @@ import subprocess
 import random
 
 
+def _fetch_job_info(name):
+    # Mock this for testing
+    command = ["squeue", "-h", f"--name={name}", "--format=\"%A %j %T %P %U %k %N\""]
+    return subprocess.check_output(command, text=True)
+
+
 def get_slurm_job_by_name(name):
     """Retrieve a list of jobs that match a given job name"""
-    command = ["squeue", "-h", f"--name={name}", "--format=\"%A %j %T %P %U %k %N\""]
 
-    output = subprocess.check_output(command, text=True)
+    output =_fetch_job_info(name)
     jobs = []
 
     def parse_meta(comment):
@@ -24,7 +29,7 @@ def get_slurm_job_by_name(name):
 
     for line in output.splitlines():
         job_id, job_name, status, partition, user, comment, nodes = line.split(' ')
-        
+
         jobs.append({
             "job_id":job_id, 
             "job_name":job_name, 
@@ -36,7 +41,6 @@ def get_slurm_job_by_name(name):
         })
 
     return jobs
-
 
 
 def find_suitable_inference_server(jobs, model):
@@ -52,6 +56,10 @@ def find_suitable_inference_server(jobs, model):
     def has_model(job, model):
         if model is None:
             return True
+        
+        # FIXME: 
+        #   /network/weights/llama.var/llama2/Llama-2-7b-hf != meta-llama/Llama-2-7b-hf
+        #
         return job['comment']['model'] == model
     
     def select(job):
@@ -84,6 +92,4 @@ def get_endpoint(model):
     server = get_inference_server(model)
     
     return f"http://{server['host']}:{server['port']}/v1"
-
-
 

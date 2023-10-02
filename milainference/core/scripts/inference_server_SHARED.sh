@@ -36,11 +36,12 @@ conda create --prefix ./env python=3.9 -y
 conda activate ./env
 pip install vllm rich simple_parsing
 
-
 #
 #    Setup shared cache to avoid redownloading weights
 #
-python /network/weights/shared_cache/setup.py 
+if [ ! -d "$HOME/scratch/cache/huggingface" ]; then
+     python /network/weights/shared_cache/setup.py 
+fi
 
 export HF_HOME=$HOME/scratch/cache/huggingface
 export HF_DATASETS_CACHE=$HOME/scratch/cache/huggingface/datasets
@@ -49,10 +50,12 @@ export TORCH_HOME=$HOME/scratch/cache/torch
 #
 #   Save metadata for retrival
 #
-PORT=9123
+
+PORT=$(python -c "import socket; sock = socket.socket(); sock.bind(('', 0)); print(sock.getsockname()[1])")
 HOST="$(hostname)"
 NAME="$WEIGHTS/$MODEL"
 
+echo " -> $HOST:$PORT"
 scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|shared=y"
 
 
