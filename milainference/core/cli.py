@@ -52,7 +52,7 @@ def server(args):
         args.model
     ]
 
-    jobid_regex = re.compile(r"Submitted batch job (?<jobid>[0-9]*)")
+    jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
     jobid = None
 
     with subprocess.Popen(
