@@ -34,7 +34,7 @@ Examples
 --------
 
 
-.. code-block::
+.. code-block:: bash
 
    ssh mila
 
