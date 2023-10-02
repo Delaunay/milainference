@@ -60,7 +60,7 @@ def server(args):
         try:
             while process.poll() is None:
                 line = process.stdout.readline()
-                print(line)
+                print(line, end='')
     
         except KeyboardInterrupt:
             print("Stopping due to user interrupt")
