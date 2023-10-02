@@ -1,5 +1,7 @@
-import subprocess
+
 from argparse import ArgumentParser
+import re
+import subprocess
 
 import pkg_resources
 import openai
@@ -50,6 +52,9 @@ def server(args):
         args.model
     ]
 
+    jobid_regex = re.compile(r"Submitted batch job (?<jobid>[0-9]*)")
+    jobid = None
+
     with subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
@@ -60,13 +65,20 @@ def server(args):
         try:
             while process.poll() is None:
                 line = process.stdout.readline()
+                
+                if match := jobid_regex.match(line):
+                    data = match.groupdict()
+                    jobid = data['jobid']
+                
                 print(line, end='')
     
         except KeyboardInterrupt:
             print("Stopping due to user interrupt")
             process.kill()
 
-        return -1
+
+    print(jobid)
+    return -1
 
 
 def nocmd(cmd):
