@@ -30,19 +30,23 @@ milainference
    pip install milainference
 
 
-
-
 Examples
 --------
 
 
 .. code-block::
 
+   ssh mila
+
+   # Launch a server (launch a slurm job and exit)
    milainfer server --model meta-llama/Llama-2-7b-chat-hf
 
+   # List all the available inference servers
+   milainfer list
 
-
-
+   # Get on a compute node and use the server for inference
+   salloc ....
+   milainfer client --prompt "Give me good advices"
 
 
 Issues
