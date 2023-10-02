@@ -18,7 +18,7 @@ def arguments():
     subparser = parser.add_subparsers(dest="cmd")
     clt = subparser.add_parser("client")
     clt.add_argument("--prompt", type=str, help="Prompt")
-    clt.add_argument("--model", type=str, help="Model name", defaul=None)
+    clt.add_argument("--model", type=str, help="Model name", default=None)
     clt.add_argument("--short", action="store_true", help="Only print the result and nothing else")
 
     srv = subparser.add_parser("server", help="Launch an inference server")
