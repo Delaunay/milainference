@@ -76,6 +76,7 @@ def server(args):
         except KeyboardInterrupt:
             print("Stopping due to user interrupt")
             process.kill()
+            return -1
 
     if jobid is not None and args.sync:
         subprocess.run(["touch", f"slurm-{jobid}.out"])
@@ -83,7 +84,7 @@ def server(args):
     else:
         print(jobid)
     
-    return -1
+    return 0
 
 
 def nocmd(cmd):

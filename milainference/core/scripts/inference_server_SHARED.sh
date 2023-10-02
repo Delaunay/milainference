@@ -34,7 +34,7 @@ source $CONDA_BASE/../etc/profile.d/conda.sh
 #
 conda create --prefix ./env python=3.9 -y 
 conda activate ./env
-pip install vllm
+pip install vllm rich simple_parsing
 
 
 #
