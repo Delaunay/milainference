@@ -40,7 +40,11 @@ if __name__ == "__main__":
             "milainference.plugins.example",
         ],
         setup_requires=["setuptools"],
-        install_requires=["importlib_resources"],
+        install_requires=[
+            "importlib_resources",
+            "vllm",
+            "openai",
+        ],
         namespace_packages=[
             "milainference",
             "milainference.plugins",
@@ -50,4 +54,9 @@ if __name__ == "__main__":
                 "milainference/data",
             ],
         },
+        entry_points={
+            "console_scripts": [
+                "milainfer = milainference.core.cli",
+            ],
+        }
     )
