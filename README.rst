@@ -29,3 +29,13 @@ milainference
 
    pip install milainference
 
+
+
+
+Examples
+-------
+
+
+.. code-block::
+
+   milainfer server --model meta-llama/Llama-2-7b-chat-hf

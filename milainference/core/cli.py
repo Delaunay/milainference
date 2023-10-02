@@ -86,4 +86,4 @@ def main():
     if cmd not in commands:
         return nocmd(cmd)
 
-    return commands.get()(args)
+    return commands.get(cmd)(args)
