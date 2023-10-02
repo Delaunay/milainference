@@ -22,6 +22,7 @@ def arguments():
 
     srv = subparser.add_parser("server", help="Launch an inference server")
     srv.add_argument("--model", type=str, help="Model name to start")
+    srv.add_argument("--sync", action="store_true", help="Wait for the server to strt")
 
     return parser.parse_args()
 
@@ -76,8 +77,12 @@ def server(args):
             print("Stopping due to user interrupt")
             process.kill()
 
-
-    print(jobid)
+    if args.sync:
+        subprocess.run(f"touch slurm-{jobid}.out")
+        subprocess.run(f"tail -f slurm-{jobid}.out")
+    else:
+        print(jobid)
+    
     return -1
 
 

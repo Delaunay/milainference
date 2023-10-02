@@ -18,7 +18,6 @@
 
 MODEL="$1"
 
-export HUGGINGFACE_HUB_CACHE="/network/weights/shared_cache/huggingface/hub"
 export MILA_WEIGHTS="/network/weights/"
 
 cd $SLURM_TMPDIR
@@ -36,6 +35,12 @@ source $CONDA_BASE/../etc/profile.d/conda.sh
 conda create --prefix ./env python=3.9 -y 
 conda activate ./env
 pip install vllm
+
+
+#
+#    Setup shared cache to avoid redownloading weights
+#
+python /network/weights/shared_cache/setup.py 
 
 #
 #   Save metadata for retrival

@@ -44,6 +44,7 @@ if __name__ == "__main__":
             "importlib_resources",
             "vllm",
             "openai",
+            "simple_parsing",
         ],
         namespace_packages=[
             "milainference",
