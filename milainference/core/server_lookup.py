@@ -2,6 +2,11 @@ import subprocess
 import random
 
 
+#
+# 
+#
+
+
 def _fetch_job_info(name):
     # Mock this for testing
     command = ["squeue", "-h", f"--name={name}", "--format=\"%A %j %T %P %U %k %N\""]
@@ -76,11 +81,16 @@ def find_suitable_inference_server(jobs, model):
     return selected
 
 
-def get_inference_server(model=None):
+def get_inference_servers(model=None):
     """Retrieve an inference server from slurm jobs"""
-    jobs = get_slurm_job_by_name('inference_server_SHARED.sh')
 
+    jobs = get_slurm_job_by_name('inference_server_SHARED.sh')
     servers = find_suitable_inference_server(jobs, model)
+    return servers
+
+
+def select_inferences_server(model):
+    servers = get_inference_servers(model)
 
     try:
         return random.choice(servers)
@@ -89,7 +99,7 @@ def get_inference_server(model=None):
 
 
 def get_endpoint(model):
-    server = get_inference_server(model)
+    server = select_inferences_server(model)
     
     return f"http://{server['host']}:{server['port']}/v1"
 

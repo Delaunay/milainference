@@ -7,7 +7,7 @@ import pkg_resources
 import openai
 
 from .client import init_client
-from .server_lookup import find_suitable_inference_server
+from .server_lookup import get_inference_servers
 
 
 
@@ -17,8 +17,8 @@ def arguments():
 
     subparser = parser.add_subparsers(dest="cmd")
     clt = subparser.add_parser("client")
-    clt.add_argument("--model", type=str, help="Model name")
     clt.add_argument("--prompt", type=str, help="Prompt")
+    clt.add_argument("--model", type=str, help="Model name", defaul=None)
     clt.add_argument("--short", action="store_true", help="Only print the result and nothing else")
 
     srv = subparser.add_parser("server", help="Launch an inference server")
@@ -26,7 +26,7 @@ def arguments():
     srv.add_argument("--sync", action="store_true", help="Wait for the server to strt")
 
     lst = subparser.add_parser("list", help="List all inference server available")
-    lst.add_argument("--model", type=str, help="Model name to start")
+    lst.add_argument("--model", type=str, help="Model name to start", default=None)
 
     return parser.parse_args()
 
@@ -93,7 +93,7 @@ def server(args):
 
 def listsrv(args):
     """List all available server"""
-    servers = find_suitable_inference_server(args.model)
+    servers = get_inference_servers(args.model)
 
     for s in servers:
         print(f' - {s["host"]}:{s["port"]} => {s["model"]}')

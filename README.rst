@@ -33,9 +33,21 @@ milainference
 
 
 Examples
--------
+--------
 
 
 .. code-block::
 
    milainfer server --model meta-llama/Llama-2-7b-chat-hf
+
+
+
+
+
+
+Issues
+------
+
+* Detect a server that is in the process of being operational but that is not yet ready
+* Detect a server that is operational but that is about to NOT me
+   * Job time out

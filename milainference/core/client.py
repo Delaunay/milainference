@@ -1,10 +1,10 @@
 import openai
 
-from .server_lookup import get_inference_server
+from .server_lookup import select_inferences_server
 
 
 def init_client(model=None):
-    server = get_inference_server(model)
+    server = select_inferences_server(model)
 
     real_model = server['model']
 
