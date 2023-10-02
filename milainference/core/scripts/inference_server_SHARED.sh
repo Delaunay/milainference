@@ -42,6 +42,10 @@ pip install vllm
 #
 python /network/weights/shared_cache/setup.py 
 
+export HF_HOME=$HOME/scratch/cache/huggingface
+export HF_DATASETS_CACHE=$HOME/scratch/cache/huggingface/datasets
+export TORCH_HOME=$HOME/scratch/cache/torch
+
 #
 #   Save metadata for retrival
 #

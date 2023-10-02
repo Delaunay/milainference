@@ -9,9 +9,7 @@ def get_slurm_job_by_name(name):
     output = subprocess.check_output(command, text=True)
     jobs = []
 
-    for line in output.splitlines():
-        job_id, job_name, status, partition, user, comment, nodes = line.split(' ')
-        
+    def parse_meta(comment):
         data = dict()
         if comment != "(null)":
             items = comment.split('|')
@@ -21,14 +19,19 @@ def get_slurm_job_by_name(name):
                     data[k] = v
                 except: 
                     pass
-            
+
+        return data
+
+    for line in output.splitlines():
+        job_id, job_name, status, partition, user, comment, nodes = line.split(' ')
+        
         jobs.append({
             "job_id":job_id, 
             "job_name":job_name, 
             "status":status,
             "partition":partition, 
             "user":user,
-            "comment": data,
+            "comment": parse_meta(comment),
             "nodes": nodes
         })
 
@@ -59,9 +62,8 @@ def find_suitable_inference_server(jobs, model):
         })
             
     for job in jobs:
-        if is_shared(job) and is_running(job):
-            if has_model(job, model):
-                select(job)
+        if is_shared(job) and is_running(job) and has_model(job, model):
+            select(job)
                 
     return selected
 

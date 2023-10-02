@@ -45,6 +45,7 @@ if __name__ == "__main__":
             "vllm",
             "openai",
             "simple_parsing",
+            "rich",
         ],
         namespace_packages=[
             "milainference",
