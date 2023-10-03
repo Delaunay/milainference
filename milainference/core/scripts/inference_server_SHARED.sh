@@ -63,8 +63,6 @@ echo " -> $HOST:$PORT"
 # 
 #   Launch Server
 #
-scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|shared=y|ready=1"
-
 python -m milainference.core.api_server            \
      --host $HOST                                  \
      --port $PORT                                  \
