@@ -20,9 +20,8 @@ def huggingface_namespace_to_path(namespace):
 
 def model_name_to_loc(model):
     try:
-        namespace, name = model.splt('/')
+        namespace, name = model.splt("/")
         p = huggingface_namespace_to_path(namespace)
         return os.path.join(p, name)
     except:
         return model
-

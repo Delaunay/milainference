@@ -17,7 +17,6 @@
 #SBATCH --mem=32G
 
 MODEL="$1"
-MODEL_PATH="$2"
 
 export MILA_WEIGHTS="/network/weights/"
 
@@ -54,17 +53,18 @@ export TORCH_HOME=$HOME/scratch/cache/torch
 
 PORT=$(python -c "import socket; sock = socket.socket(); sock.bind(('', 0)); print(sock.getsockname()[1])")
 HOST="$(hostname)"
+NAME="$WEIGHTS/$MODEL"
 
 echo " -> $HOST:$PORT"
-scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|shared=y|ready=0"
+scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|shared=y"
 
 
 # 
 #   Launch Server
 #
-python -m milainference.api_server                 \
-     --host $HOST                                  \
-     --port $PORT                                  \
-     --model "$MODEL_PATH"                         \
-     --tensor-parallel-size $SLURM_NTASKS_PER_NODE \
-     --served-model-name "$MODEL"
+python -m vllm.entrypoints.openai.api_server     \
+     --host $HOST                                \
+     --port $PORT                                \
+     --model "$MODEL"                            \
+     --tensor-parallel-size $SLURM_NTASKS_PER_NODE
+
