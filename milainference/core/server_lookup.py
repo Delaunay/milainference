@@ -37,6 +37,7 @@ def get_slurm_job_by_name(name):
     output = _fetch_job_info(name)
     jobs = []
 
+
     for line in output.splitlines():
         (
             job_id,
@@ -49,8 +50,23 @@ def get_slurm_job_by_name(name):
             timeleft,
         ) = line.split(" ")
 
-        hours, minutes, seconds = timeleft.split(":")
+        hours, minutes, secondes = 0, 0, 0
+        values = timeleft.split(":")
+        
+        if len(values) == 1:
+            secondes = values[0]
+            
+        if len(values) == 2:
+            minutes = values[0]
+            secondes = values[1]
+            
+        if len(values) == 3:
+            hours = values[0]
+            minutes = values[1]
+            secondes = values[2]
+        
         timeleft = datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+        print(timeleft)
         jobs.append(
             {
                 "job_id": job_id,

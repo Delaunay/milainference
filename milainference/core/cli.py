@@ -67,7 +67,7 @@ def server(args):
         sbatch_script,
         args.model,
         args.path,
-    ] + args.args
+    ] + args.args[0]
 
     jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
     jobid = None
