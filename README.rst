@@ -51,18 +51,3 @@ Examples
 
    # Get on a compute node and use the server for inference
    milainfer client --prompt "Give me good advices"
-
-
-Issues
-------
-
-* Detect a server that is in the process of being operational but that is not yet ready
-   * we need to add a state to the job metadata
-   * scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|state=0|shared=y"
-   * ...
-   * scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|state=1|shared=y"
-   * PROBLEM: are we going to be able ot change the state when the server is really ready ?
-
-
-* Detect a server that is operational but that is about to NOT be
-   * Job time out: this is easy to detect
