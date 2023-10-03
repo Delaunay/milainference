@@ -12,7 +12,6 @@ from vllm.entrypoints.openai.api_server import (
     uvicorn,
     TIMEOUT_KEEP_ALIVE,
     served_model,
-    tokenizer,
     engine,
 )
 

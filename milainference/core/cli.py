@@ -39,6 +39,9 @@ def arguments():
     store.add_argument("--update", action="store_true", help="Only update modified keys")
     store.add_argument("args", nargs="*", action="append", help="Key=Value pairs")
 
+    clt = subparser.add_parser("waitfor", help="Wait for a model to come online")
+    clt.add_argument("--model", type=str, help="Model name")
+
     return parser.parse_args()
 
 
@@ -116,8 +119,10 @@ def nocmd(cmd):
     return
 
 
-def job_metadata():
-    jobid = os.environ.get("SLURM_JOB_ID")
+def job_metadata(jobid=None):
+    if jobid is None:
+        jobid = os.environ.get("SLURM_JOB_ID")
+    
     command = ["squeue", "-h", f"--job={jobid}", '--format="%k"']
     
     output = subprocess.check_output(command, text=True)
@@ -198,6 +203,25 @@ def store(args):
         raise RuntimeError("Could not find job id inside environment")
 
 
+def waitfor(args):
+    servers = get_inference_servers(args.model, pending_ok=True)
+    ready = False
+    selected_server = None
+
+    while not ready:
+        for server in servers:
+            info = job_metadata(server["job_id"])
+
+            if info.get("ready", '0') == 1:
+                ready = True
+                selected_server = server
+                break
+
+    print("The following server is ready")
+    print(f"   {selected_server}")
+
+
+
 def main():
     args = arguments()
 
@@ -206,6 +230,7 @@ def main():
         "server": server,
         "list": listsrv,
         "store": store,
+        "waitfor": waitfor,
     }
 
     cmd = vars(args).pop("cmd")

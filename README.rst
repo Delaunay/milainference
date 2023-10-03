@@ -38,14 +38,15 @@ Examples
 
    ssh mila
 
+   salloc ....
+
    # Launch a server (launch a slurm job and exit)
-   milainfer server --model meta-llama/Llama-2-7b-chat-hf
+   milainfer server --path /network/weights/llama.var/llama2/Llama-2-7b-chat-hf/
 
    # List all the available inference servers
    milainfer list
 
    # Get on a compute node and use the server for inference
-   salloc ....
    milainfer client --prompt "Give me good advices"
 
 
@@ -58,7 +59,7 @@ Issues
    * ...
    * scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|state=1|shared=y"
    * PROBLEM: are we going to be able ot change the state when the server is really ready ?
-   
+
 
 * Detect a server that is operational but that is about to NOT be
    * Job time out: this is easy to detect

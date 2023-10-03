@@ -67,53 +67,61 @@ def get_slurm_job_by_name(name):
     return jobs
 
 
-def find_suitable_inference_server(jobs, model):
-    """Select suitable jobs from a list, looking for a specific model"""
-    selected = []
 
-    def is_shared(job):
-        return job["comment"].get("shared", "y") == "y"
+def is_shared(job, **kwargs):
+    return job["comment"].get("shared", "y") == "y"
 
-    def is_running(job):
-        timeleft = job["timeleft"]
 
-        return job["status"] == "RUNNING" and timeleft.total_seconds() > 20
+def is_running(job, **kwargs):
+    timeleft = job["timeleft"]
 
-    def is_ready(job):
-        return job["comment"].get("ready", "0") == "1"
+    return job["status"] == "RUNNING" and timeleft.total_seconds() > 20
 
-    def has_model(job, model):
-        if model is None:
-            return True
 
-        # FIXME:
-        #   /network/weights/llama.var/llama2/Llama-2-7b-hf != meta-llama/Llama-2-7b-hf
-        #
-        return job["comment"]["model"] == model
+def is_ready(job, pending_ok=False, **kwargs):
+    if pending_ok:
+        return True
+    
+    return job["comment"].get("ready", "0") == "1"
 
-    def select(job):
-        selected.append(
-            {
-                "model": job["comment"]["model"],
-                "host": job["comment"]["host"],
-                "port": job["comment"]["port"],
-            }
-        )
 
-    for job in jobs:
-        if (
-            True
-            and is_shared(job)
+def has_model(job, model, **kwargs):
+    if model is None:
+        return True
+    # FIXME:
+    #   /network/weights/llama.var/llama2/Llama-2-7b-hf != meta-llama/Llama-2-7b-hf
+    #
+    return job["comment"]["model"] == model
+
+
+def select_fields(job):
+    return   {   
+        "job_id": job["job_id"],
+        "model": job["comment"]["model"],
+        "host": job["comment"]["host"],
+        "port": job["comment"]["port"],
+    }
+
+
+def suitable_inference_server_filter(model, pending_ok):
+    def filter(job):
+        return (
+            is_shared(job)
             and is_running(job)
             and has_model(job, model)
-            and is_ready(job)
-        ):
-            select(job)
-
-    return selected
+            and is_ready(job, pending_ok)
+        )
+    return filter
 
 
-def get_inference_servers(model=None):
+def find_suitable_inference_server(jobs, model, pending_ok=False):
+    """Select suitable jobs from a list, looking for a specific model"""
+    fn = suitable_inference_server_filter(model, pending_ok)
+
+    return list(map(select_fields, filter(fn, jobs)))
+
+
+def get_inference_servers(model=None, pending_ok=False):
     """Retrieve an inference server from slurm jobs"""
 
     jobs = get_slurm_job_by_name("inference_server_SHARED.sh")
