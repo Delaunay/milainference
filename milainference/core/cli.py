@@ -216,7 +216,7 @@ def waitfor(args):
         for server in servers:
             info = job_metadata(server["job_id"])
 
-            if info.get("ready", '0') == 1:
+            if info.get("ready", '0') == '1':
                 ready = True
                 selected_server = server
                 break

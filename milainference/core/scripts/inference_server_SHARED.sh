@@ -64,9 +64,8 @@ echo " -> $HOST:$PORT"
 #   Launch Server
 #
 scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|shared=y|ready=1"
-# This does not work
-# python -m milainference.core.api_server      \
-python -m vllm.entrypoints.openai.api_server      \
+
+python -m milainference.core.api_server            \
      --host $HOST                                  \
      --port $PORT                                  \
      --model "$MODEL_PATH"                         \
