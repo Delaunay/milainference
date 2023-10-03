@@ -74,3 +74,6 @@ docs/src/reference
 # PyBuilder
 target/
 _build/
+
+
+slurm-*.out

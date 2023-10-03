@@ -120,8 +120,20 @@ def job_metadata():
     jobid = os.environ.get("SLURM_JOB_ID")
     command = ["squeue", "-h", f"--job={jobid}", '--format="%k"']
     
-    output=subprocess.check_output(command, text=True)
-
+    output = subprocess.check_output(command, text=True)
+    
+    s = 0
+    e = len(output)
+    
+    if output[s] == '"':
+        s += 1
+        
+    if output[e - 1] == '"':
+        e -= 1
+    
+    output = output[s:e]
+    
+    
     meta = dict()
     for line in output.splitlines():
         meta.update(parse_meta(line))
@@ -151,11 +163,12 @@ def update_comment(*metdata):
         original[k] = v
 
     newcomment = []
-    for k, v in metdata:
+    for k, v in original.items():
         newcomment.append(f'{k}={v}')
     newcomment = '|'.join(newcomment)
 
     set_comment(newcomment)
+    print(newcomment)
 
 
 def store(args):
@@ -175,10 +188,11 @@ def store(args):
     if jobid is not None:
 
         if args.update:
-            update_comment(*args.args)
+            update_comment(*args.args[0])
         else:
-            metadata = "|".join(args.args)
+            metadata = "|".join(args.args[0])
             set_comment(metadata)
+            print(metadata)
     
     else:
         raise RuntimeError("Could not find job id inside environment")
