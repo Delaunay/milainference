@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, REMAINDER
 import re
 import subprocess
 import os
@@ -30,7 +30,7 @@ def arguments():
     srv.add_argument("--model", type=str, help="Model name to start", default=None)
     srv.add_argument("--path", type=str, help="Model path")
     srv.add_argument("--sync", action="store_true", help="Wait for the server to strt")
-    srv.add_argument("args", nargs="*", action="append", help="Slurm arguments")
+    srv.add_argument('args', nargs=REMAINDER)
 
     lst = subparser.add_parser("list", help="List all inference server available")
     lst.add_argument("--model", type=str, help="Model name to start", default=None)
@@ -72,7 +72,7 @@ def server(args):
         sbatch_script,
         args.model,
         args.path,
-    ] + args.args[0]
+    ] + args.args
 
     jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
     jobid = None

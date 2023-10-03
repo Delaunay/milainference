@@ -46,6 +46,9 @@ Examples
    # List all the available inference servers
    milainfer list
 
+   # Wait for a specific model to be online
+   milainfer waitfor --model Llama-2-7b-chat-hf
+
    # Get on a compute node and use the server for inference
    milainfer client --prompt "Give me good advices"
 
