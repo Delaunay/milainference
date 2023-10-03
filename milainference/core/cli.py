@@ -28,7 +28,7 @@ def arguments():
 
     srv = subparser.add_parser("server", help="Launch an inference server")
     srv.add_argument("--model", type=str, help="Model name to start", default=None)
-    clt.add_argument("--path", type=str, help="Model path")
+    srv.add_argument("--path", type=str, help="Model path")
     srv.add_argument("--sync", action="store_true", help="Wait for the server to strt")
     srv.add_argument("args", nargs="*", action="append", help="Slurm arguments")
 
