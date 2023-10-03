@@ -7,7 +7,7 @@ import pkg_resources
 import openai
 
 from .client import init_client
-from .server_lookup import get_inference_servers, parse_meta
+from .server_lookup import get_inference_servers, parse_meta, extract_output
 
 
 def _run(cmd):
@@ -63,8 +63,10 @@ def server(args):
     )
 
     if args.model is None:
-        args.model = args.path.split('/')[-1]
+        args.model = list(filter(lambda s: len(s) != 0, args.path.split('/')))[-1]
 
+    assert args.model != ""
+    
     cmd = [
         "sbatch",
         sbatch_script,
@@ -108,10 +110,14 @@ def server(args):
 
 def listsrv(args):
     """List all available server"""
-    servers = get_inference_servers(args.model)
+    servers = get_inference_servers(args.model, pending_ok=True)
 
     for s in servers:
-        print(f' - {s["host"]}:{s["port"]} => {s["model"]}')
+        status = "PENDING"
+        if s["ready"] == '1':
+            status = "READY  "
+        
+        print(f' - {status} {s["host"]}:{s["port"]} => {s["model"]}')
 
 
 def nocmd(cmd):
@@ -126,17 +132,7 @@ def job_metadata(jobid=None):
     command = ["squeue", "-h", f"--job={jobid}", '--format="%k"']
     
     output = subprocess.check_output(command, text=True)
-    
-    s = 0
-    e = len(output)
-    
-    if output[s] == '"':
-        s += 1
-        
-    if output[e - 1] == '"':
-        e -= 1
-    
-    output = output[s:e]
+    output = extract_output(output)
     
     
     meta = dict()
@@ -204,11 +200,19 @@ def store(args):
 
 
 def waitfor(args):
+    import time
+    
     servers = get_inference_servers(args.model, pending_ok=True)
-    ready = False
+    ready = len(servers) == 0
     selected_server = None
+    newlist = []
+    start = time.time()
+    newline = False
 
     while not ready:
+        print(f"\rWaiting on {len(servers)} servers for {time.time() - start:.2f}s", end="")
+        newline = True
+        
         for server in servers:
             info = job_metadata(server["job_id"])
 
@@ -216,10 +220,25 @@ def waitfor(args):
                 ready = True
                 selected_server = server
                 break
-
-    print("The following server is ready")
-    print(f"   {selected_server}")
-
+        
+            if len(info) != 0:
+                newlist.append(server)
+            
+        time.sleep(1)
+        servers = newlist
+        newlist = []
+        
+        if len(servers) == 0:
+            break
+        
+    if newline:
+        print()
+ 
+    if selected_server:
+        print("The following server is ready")
+        print(f"   {selected_server}")
+    else:
+        print("No pending server found")
 
 
 def main():

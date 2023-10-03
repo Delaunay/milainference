@@ -24,6 +24,15 @@ export MILA_WEIGHTS="/network/weights/"
 cd $SLURM_TMPDIR
 
 #
+#   Save metadata for retrival
+#
+
+PORT=$(python -c "import socket; sock = socket.socket(); sock.bind(('', 0)); print(sock.getsockname()[1])")
+HOST="$(hostname)"
+scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|shared=y|ready=0"
+
+
+#
 #   Fix problem with conda saying it is not "init properly"
 #
 CONDA_EXEC="$(which conda)"
@@ -48,23 +57,19 @@ export HF_HOME=$HOME/scratch/cache/huggingface
 export HF_DATASETS_CACHE=$HOME/scratch/cache/huggingface/datasets
 export TORCH_HOME=$HOME/scratch/cache/torch
 
-#
-#   Save metadata for retrival
-#
-
-PORT=$(python -c "import socket; sock = socket.socket(); sock.bind(('', 0)); print(sock.getsockname()[1])")
-HOST="$(hostname)"
 
 echo " -> $HOST:$PORT"
-scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|shared=y|ready=0"
-
 
 # 
 #   Launch Server
 #
-python -m milainference.core.api_server                 \
+scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|shared=y|ready=1"
+# This does not work
+# python -m milainference.core.api_server      \
+python -m vllm.entrypoints.openai.api_server      \
      --host $HOST                                  \
      --port $PORT                                  \
      --model "$MODEL_PATH"                         \
      --tensor-parallel-size $SLURM_NTASKS_PER_NODE \
      --served-model-name "$MODEL"
+
