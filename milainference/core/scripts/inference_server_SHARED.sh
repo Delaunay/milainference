@@ -35,7 +35,7 @@ source $CONDA_BASE/../etc/profile.d/conda.sh
 #
 conda create --prefix ./env python=3.9 -y 
 conda activate ./env
-pip install vllm rich simple_parsing
+pip install git+https://github.com/Delaunay/milainference
 
 #
 #    Setup shared cache to avoid redownloading weights
@@ -62,7 +62,7 @@ scontrol update job $SLURM_JOB_ID comment="model=$MODEL|host=$HOST|port=$PORT|sh
 # 
 #   Launch Server
 #
-python -m milainference.api_server                 \
+python -m milainference.core.api_server                 \
      --host $HOST                                  \
      --port $PORT                                  \
      --model "$MODEL_PATH"                         \
