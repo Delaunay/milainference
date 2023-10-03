@@ -17,7 +17,7 @@ def _run(cmd):
 
 def arguments():
     parser = ArgumentParser()
-
+    
     subparser = parser.add_subparsers(dest="cmd")
     clt = subparser.add_parser("client")
     clt.add_argument("--prompt", type=str, help="Prompt")
@@ -30,19 +30,21 @@ def arguments():
     srv.add_argument("--model", type=str, help="Model name to start", default=None)
     srv.add_argument("--path", type=str, help="Model path")
     srv.add_argument("--sync", action="store_true", help="Wait for the server to strt")
-    srv.add_argument('args', nargs=REMAINDER)
+    
 
     lst = subparser.add_parser("list", help="List all inference server available")
     lst.add_argument("--model", type=str, help="Model name to start", default=None)
 
     store = subparser.add_parser("store", help="Store metadata")
     store.add_argument("--update", action="store_true", help="Only update modified keys")
-    store.add_argument("args", nargs="*", action="append", help="Key=Value pairs")
 
     clt = subparser.add_parser("waitfor", help="Wait for a model to come online")
     clt.add_argument("--model", type=str, help="Model name")
 
-    return parser.parse_args()
+    # parser.add_argument('args', nargs=REMAINDER)
+    args, unknown = parser.parse_known_args()
+    vars(args)['args'] = unknown
+    return args
 
 
 def client(args):
@@ -68,11 +70,12 @@ def server(args):
     assert args.model != ""
     
     cmd = [
-        "sbatch",
+        "sbatch"
+    ] + args.args + [
         sbatch_script,
         args.model,
         args.path,
-    ] + args.args
+    ]
 
     jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
     jobid = None
@@ -189,9 +192,9 @@ def store(args):
     if jobid is not None:
 
         if args.update:
-            update_comment(*args.args[0])
+            update_comment(*args.args)
         else:
-            metadata = "|".join(args.args[0])
+            metadata = "|".join(args.args)
             set_comment(metadata)
             print(metadata)
     
