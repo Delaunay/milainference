@@ -17,7 +17,7 @@ def _run(cmd):
 
 def arguments():
     parser = ArgumentParser()
-    
+
     subparser = parser.add_subparsers(dest="cmd")
     clt = subparser.add_parser("client")
     clt.add_argument("--prompt", type=str, help="Prompt")
@@ -30,20 +30,21 @@ def arguments():
     srv.add_argument("--model", type=str, help="Model name to start", default=None)
     srv.add_argument("--path", type=str, help="Model path")
     srv.add_argument("--sync", action="store_true", help="Wait for the server to strt")
-    
 
     lst = subparser.add_parser("list", help="List all inference server available")
     lst.add_argument("--model", type=str, help="Model name to start", default=None)
 
     store = subparser.add_parser("store", help="Store metadata")
-    store.add_argument("--update", action="store_true", help="Only update modified keys")
+    store.add_argument(
+        "--update", action="store_true", help="Only update modified keys"
+    )
 
     clt = subparser.add_parser("waitfor", help="Wait for a model to come online")
     clt.add_argument("--model", type=str, help="Model name")
 
     # parser.add_argument('args', nargs=REMAINDER)
     args, unknown = parser.parse_known_args()
-    vars(args)['args'] = unknown
+    vars(args)["args"] = unknown
     return args
 
 
@@ -65,17 +66,19 @@ def server(args):
     )
 
     if args.model is None:
-        args.model = list(filter(lambda s: len(s) != 0, args.path.split('/')))[-1]
+        args.model = list(filter(lambda s: len(s) != 0, args.path.split("/")))[-1]
 
     assert args.model != ""
-    
-    cmd = [
-        "sbatch"
-    ] + args.args + [
-        sbatch_script,
-        args.model,
-        args.path,
-    ]
+
+    cmd = (
+        ["sbatch"]
+        + args.args
+        + [
+            sbatch_script,
+            args.model,
+            args.path,
+        ]
+    )
 
     jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
     jobid = None
@@ -117,9 +120,9 @@ def listsrv(args):
 
     for s in servers:
         status = "PENDING"
-        if s["ready"] == '1':
+        if s["ready"] == "1":
             status = "READY  "
-        
+
         print(f' - {status} {s["host"]}:{s["port"]} => {s["model"]}')
 
 
@@ -131,13 +134,12 @@ def nocmd(cmd):
 def job_metadata(jobid=None):
     if jobid is None:
         jobid = os.environ.get("SLURM_JOB_ID")
-    
+
     command = ["squeue", "-h", f"--job={jobid}", '--format="%k"']
-    
+
     output = subprocess.check_output(command, text=True)
     output = extract_output(output)
-    
-    
+
     meta = dict()
     for line in output.splitlines():
         meta.update(parse_meta(line))
@@ -163,13 +165,13 @@ def update_comment(*metdata):
     original = job_metadata()
 
     for kv in metdata:
-        k, v = kv.split('=')
+        k, v = kv.split("=")
         original[k] = v
 
     newcomment = []
     for k, v in original.items():
-        newcomment.append(f'{k}={v}')
-    newcomment = '|'.join(newcomment)
+        newcomment.append(f"{k}={v}")
+    newcomment = "|".join(newcomment)
 
     set_comment(newcomment)
     print(newcomment)
@@ -185,26 +187,25 @@ def store(args):
        milainfer store model=$MODEL host=$HOST port=$PORT shared=y ready=0
 
        milainfer store --update ready=1
-    
+
     """
     jobid = os.environ.get("SLURM_JOB_ID")
 
     if jobid is not None:
-
         if args.update:
             update_comment(*args.args)
         else:
             metadata = "|".join(args.args)
             set_comment(metadata)
             print(metadata)
-    
+
     else:
         raise RuntimeError("Could not find job id inside environment")
 
 
 def waitfor(args):
     import time
-    
+
     servers = get_inference_servers(args.model, pending_ok=True)
     ready = len(servers) == 0
     selected_server = None
@@ -213,30 +214,33 @@ def waitfor(args):
     newline = False
 
     while not ready:
-        print(f"\rWaiting on {len(servers)} servers for {time.time() - start:.2f}s", end="")
+        print(
+            f"\rWaiting on {len(servers)} servers for {time.time() - start:.2f}s",
+            end="",
+        )
         newline = True
-        
+
         for server in servers:
             info = job_metadata(server["job_id"])
 
-            if info.get("ready", '0') == '1':
+            if info.get("ready", "0") == "1":
                 ready = True
                 selected_server = server
                 break
-        
+
             if len(info) != 0:
                 newlist.append(server)
-            
+
         time.sleep(1)
         servers = newlist
         newlist = []
-        
+
         if len(servers) == 0:
             break
-        
+
     if newline:
         print()
- 
+
     if selected_server:
         print("The following server is ready")
         print(f"   {selected_server}")

@@ -17,10 +17,9 @@ def _fetch_job_info(name):
     return subprocess.check_output(command, text=True)
 
 
-
 def extract_output(out):
-    return out.replace('"', '')
-    
+    return out.replace('"', "")
+
 
 def parse_meta(comment):
     data = dict()
@@ -58,20 +57,22 @@ def get_slurm_job_by_name(name):
 
         hours, minutes, seconds = 0, 0, 0
         values = timeleft.split(":")
-        
+
         if len(values) == 1:
             seconds = values[0]
-            
+
         if len(values) == 2:
             minutes = values[0]
             seconds = values[1]
-            
+
         if len(values) == 3:
             hours = values[0]
             minutes = values[1]
             seconds = values[2]
 
-        timeleft = datetime.timedelta(hours=int(hours), minutes=int(minutes), seconds=int(seconds))
+        timeleft = datetime.timedelta(
+            hours=int(hours), minutes=int(minutes), seconds=int(seconds)
+        )
 
         jobs.append(
             {
@@ -95,17 +96,17 @@ def is_shared(job, **kwargs):
 
 def is_running(job, pending_ok=False, **kwargs):
     timeleft = job["timeleft"]
-    
+
     if pending_ok:
         return timeleft.total_seconds() > 20
-    
+
     return job["status"] == "RUNNING" and timeleft.total_seconds() > 20
 
 
 def is_ready(job, pending_ok=False, **kwargs):
     if pending_ok:
         return True
-    
+
     return job["comment"].get("ready", "0") == "1"
 
 
@@ -120,12 +121,12 @@ def has_model(job, model, **kwargs):
 
 
 def select_fields(job):
-    return   {   
+    return {
         "job_id": job["job_id"],
         "model": job["comment"].get("model"),
         "host": job["comment"]["host"],
         "port": job["comment"]["port"],
-        "ready": job["comment"]["ready"]
+        "ready": job["comment"]["ready"],
     }
 
 
@@ -137,6 +138,7 @@ def suitable_inference_server_filter(model, pending_ok):
             and has_model(job, model)
             and is_ready(job, pending_ok)
         )
+
     return f
 
 

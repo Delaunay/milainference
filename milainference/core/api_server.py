@@ -23,12 +23,25 @@ def main():
     from vllm.engine.arg_utils import AsyncEngineArgs
     from vllm.engine.async_llm_engine import AsyncLLMEngine
     from vllm.entrypoints.openai.protocol import (
-        CompletionRequest, CompletionResponse, CompletionResponseChoice,
-        CompletionResponseStreamChoice, CompletionStreamResponse,
-        ChatCompletionRequest, ChatCompletionResponse,
-        ChatCompletionResponseChoice, ChatCompletionResponseStreamChoice,
-        ChatCompletionStreamResponse, ChatMessage, DeltaMessage, ErrorResponse,
-        LogProbs, ModelCard, ModelList, ModelPermission, UsageInfo)
+        CompletionRequest,
+        CompletionResponse,
+        CompletionResponseChoice,
+        CompletionResponseStreamChoice,
+        CompletionStreamResponse,
+        ChatCompletionRequest,
+        ChatCompletionResponse,
+        ChatCompletionResponseChoice,
+        ChatCompletionResponseStreamChoice,
+        ChatCompletionStreamResponse,
+        ChatMessage,
+        DeltaMessage,
+        ErrorResponse,
+        LogProbs,
+        ModelCard,
+        ModelList,
+        ModelPermission,
+        UsageInfo,
+    )
     from vllm.logger import init_logger
     from vllm.outputs import RequestOutput
     from vllm.sampling_params import SamplingParams
@@ -39,6 +52,7 @@ def main():
         import fastchat
         from fastchat.conversation import Conversation, SeparatorStyle
         from fastchat.model.model_adapter import get_conversation_template
+
         _fastchat_available = True
     except ImportError:
         _fastchat_available = False
@@ -50,18 +64,17 @@ def main():
     app = fastapi.FastAPI()
     engine = None
 
-
-    def create_error_response(status_code: HTTPStatus,
-                            message: str) -> JSONResponse:
-        return JSONResponse(ErrorResponse(message=message,
-                                        type="invalid_request_error").dict(),
-                            status_code=status_code.value)
-
+    def create_error_response(status_code: HTTPStatus, message: str) -> JSONResponse:
+        return JSONResponse(
+            ErrorResponse(message=message, type="invalid_request_error").dict(),
+            status_code=status_code.value,
+        )
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request, exc):  # pylint: disable=unused-argument
+    async def validation_exception_handler(
+        request, exc
+    ):  # pylint: disable=unused-argument
         return create_error_response(HTTPStatus.BAD_REQUEST, str(exc))
-
 
     async def check_model(request) -> Optional[JSONResponse]:
         if request.model == served_model:
@@ -72,7 +85,6 @@ def main():
         )
         return ret
 
-
     async def get_gen_prompt(request) -> str:
         if not _fastchat_available:
             raise ModuleNotFoundError(
@@ -82,7 +94,8 @@ def main():
         if version.parse(fastchat.__version__) < version.parse("0.2.23"):
             raise ImportError(
                 f"fastchat version is low. Current version: {fastchat.__version__} "
-                "Please upgrade fastchat to use: `$ pip install -U fschat`")
+                "Please upgrade fastchat to use: `$ pip install -U fschat`"
+            )
 
         conv = get_conversation_template(request.model)
         conv = Conversation(
@@ -119,15 +132,14 @@ def main():
 
         return prompt
 
-
     async def check_length(
         request: Union[ChatCompletionRequest, CompletionRequest],
         prompt: Optional[str] = None,
-        prompt_ids: Optional[List[int]] = None
+        prompt_ids: Optional[List[int]] = None,
     ) -> Tuple[List[int], Optional[JSONResponse]]:
-        assert (not (prompt is None and prompt_ids is None)
-                and not (prompt is not None and prompt_ids is not None)
-                ), "Either prompt or prompt_ids should be provided."
+        assert not (prompt is None and prompt_ids is None) and not (
+            prompt is not None and prompt_ids is not None
+        ), "Either prompt or prompt_ids should be provided."
         if prompt_ids is not None:
             input_ids = prompt_ids
         else:
@@ -148,21 +160,21 @@ def main():
         else:
             return input_ids, None
 
-
     @app.get("/v1/models")
     async def show_available_models():
         """Show available models. Right now we only have one model."""
         model_cards = [
-            ModelCard(id=served_model,
-                    root=served_model,
-                    permission=[ModelPermission()])
+            ModelCard(
+                id=served_model, root=served_model, permission=[ModelPermission()]
+            )
         ]
         return ModelList(data=model_cards)
 
-
-    def create_logprobs(token_ids: List[int],
-                        id_logprobs: List[Dict[int, float]],
-                        initial_text_offset: int = 0) -> LogProbs:
+    def create_logprobs(
+        token_ids: List[int],
+        id_logprobs: List[Dict[int, float]],
+        initial_text_offset: int = 0,
+    ) -> LogProbs:
         """Create OpenAI-style logprobs."""
         logprobs = LogProbs()
         last_token_len = 0
@@ -173,20 +185,18 @@ def main():
             if len(logprobs.text_offset) == 0:
                 logprobs.text_offset.append(initial_text_offset)
             else:
-                logprobs.text_offset.append(logprobs.text_offset[-1] +
-                                            last_token_len)
+                logprobs.text_offset.append(logprobs.text_offset[-1] + last_token_len)
             last_token_len = len(token)
 
-            logprobs.top_logprobs.append({
-                tokenizer.convert_ids_to_tokens(i): p
-                for i, p in id_logprob.items()
-            })
+            logprobs.top_logprobs.append(
+                {tokenizer.convert_ids_to_tokens(i): p for i, p in id_logprob.items()}
+            )
         return logprobs
 
-
     @app.post("/v1/chat/completions")
-    async def create_chat_completion(request: ChatCompletionRequest,
-                                    raw_request: Request):
+    async def create_chat_completion(
+        request: ChatCompletionRequest, raw_request: Request
+    ):
         """Completion API similar to OpenAI's API.
 
         See  https://platform.openai.com/docs/api-reference/chat/create
@@ -204,8 +214,9 @@ def main():
 
         if request.logit_bias is not None and len(request.logit_bias) > 0:
             # TODO: support logit_bias in vLLM engine.
-            return create_error_response(HTTPStatus.BAD_REQUEST,
-                                        "logit_bias is not currently supported")
+            return create_error_response(
+                HTTPStatus.BAD_REQUEST, "logit_bias is not currently supported"
+            )
 
         prompt = await get_gen_prompt(request)
         token_ids, error_check_ret = await check_length(request, prompt=prompt)
@@ -234,8 +245,9 @@ def main():
         except ValueError as e:
             return create_error_response(HTTPStatus.BAD_REQUEST, str(e))
 
-        result_generator = engine.generate(prompt, sampling_params, request_id,
-                                        token_ids)
+        result_generator = engine.generate(
+            prompt, sampling_params, request_id, token_ids
+        )
 
         def create_stream_response_json(
             index: int,
@@ -265,9 +277,9 @@ def main():
                     delta=DeltaMessage(role="assistant"),
                     finish_reason=None,
                 )
-                chunk = ChatCompletionStreamResponse(id=request_id,
-                                                    choices=[choice_data],
-                                                    model=model_name)
+                chunk = ChatCompletionStreamResponse(
+                    id=request_id, choices=[choice_data], model=model_name
+                )
                 data = chunk.json(exclude_unset=True, ensure_ascii=False)
                 yield f"data: {data}\n\n"
 
@@ -277,7 +289,7 @@ def main():
                 res: RequestOutput
                 for output in res.outputs:
                     i = output.index
-                    delta_text = output.text[len(previous_texts[i]):]
+                    delta_text = output.text[len(previous_texts[i]) :]
                     previous_texts[i] = output.text
                     previous_num_tokens[i] = len(output.token_ids)
                     response_json = create_stream_response_json(
@@ -296,8 +308,9 @@ def main():
 
         # Streaming response
         if request.stream:
-            return StreamingResponse(completion_stream_generator(),
-                                    media_type="text/event-stream")
+            return StreamingResponse(
+                completion_stream_generator(), media_type="text/event-stream"
+            )
 
         # Non-streaming response
         final_res: RequestOutput = None
@@ -305,8 +318,9 @@ def main():
             if await raw_request.is_disconnected():
                 # Abort the request if the client disconnects.
                 await engine.abort(request_id)
-                return create_error_response(HTTPStatus.BAD_REQUEST,
-                                            "Client disconnected")
+                return create_error_response(
+                    HTTPStatus.BAD_REQUEST, "Client disconnected"
+                )
             final_res = res
         assert final_res is not None
         choices = []
@@ -320,7 +334,8 @@ def main():
 
         num_prompt_tokens = len(final_res.prompt_token_ids)
         num_generated_tokens = sum(
-            len(output.token_ids) for output in final_res.outputs)
+            len(output.token_ids) for output in final_res.outputs
+        )
         usage = UsageInfo(
             prompt_tokens=num_prompt_tokens,
             completion_tokens=num_generated_tokens,
@@ -343,11 +358,11 @@ def main():
                 yield f"data: {response_json}\n\n"
                 yield "data: [DONE]\n\n"
 
-            return StreamingResponse(fake_stream_generator(),
-                                    media_type="text/event-stream")
+            return StreamingResponse(
+                fake_stream_generator(), media_type="text/event-stream"
+            )
 
         return response
-
 
     @app.post("/v1/completions")
     async def create_completion(request: CompletionRequest, raw_request: Request):
@@ -372,18 +387,21 @@ def main():
         if request.echo:
             # We do not support echo since the vLLM engine does not
             # currently support getting the logprobs of prompt tokens.
-            return create_error_response(HTTPStatus.BAD_REQUEST,
-                                        "echo is not currently supported")
+            return create_error_response(
+                HTTPStatus.BAD_REQUEST, "echo is not currently supported"
+            )
 
         if request.suffix is not None:
             # The language models we currently support do not support suffix.
-            return create_error_response(HTTPStatus.BAD_REQUEST,
-                                        "suffix is not currently supported")
+            return create_error_response(
+                HTTPStatus.BAD_REQUEST, "suffix is not currently supported"
+            )
 
         if request.logit_bias is not None and len(request.logit_bias) > 0:
             # TODO: support logit_bias in vLLM engine.
-            return create_error_response(HTTPStatus.BAD_REQUEST,
-                                        "logit_bias is not currently supported")
+            return create_error_response(
+                HTTPStatus.BAD_REQUEST, "logit_bias is not currently supported"
+            )
 
         model_name = request.model
         request_id = f"cmpl-{random_uuid()}"
@@ -391,8 +409,9 @@ def main():
         use_token_ids = False
         if isinstance(request.prompt, list):
             if len(request.prompt) == 0:
-                return create_error_response(HTTPStatus.BAD_REQUEST,
-                                            "please provide at least one prompt")
+                return create_error_response(
+                    HTTPStatus.BAD_REQUEST, "please provide at least one prompt"
+                )
             first_element = request.prompt[0]
             if isinstance(first_element, int):
                 use_token_ids = True
@@ -402,7 +421,8 @@ def main():
                 if len(request.prompt) > 1:
                     return create_error_response(
                         HTTPStatus.BAD_REQUEST,
-                        "multiple prompts in a batch is not currently supported")
+                        "multiple prompts in a batch is not currently supported",
+                    )
                 use_token_ids = not isinstance(first_element, str)
                 prompt = request.prompt[0]
         else:
@@ -437,19 +457,21 @@ def main():
             return create_error_response(HTTPStatus.BAD_REQUEST, str(e))
 
         if use_token_ids:
-            result_generator = engine.generate(None,
-                                            sampling_params,
-                                            request_id,
-                                            prompt_token_ids=prompt)
+            result_generator = engine.generate(
+                None, sampling_params, request_id, prompt_token_ids=prompt
+            )
         else:
-            result_generator = engine.generate(prompt, sampling_params, request_id,
-                                            token_ids)
+            result_generator = engine.generate(
+                prompt, sampling_params, request_id, token_ids
+            )
 
         # Similar to the OpenAI API, when n != best_of, we do not stream the
         # results. In addition, we do not stream the results when use beam search.
-        stream = (request.stream
-                and (request.best_of is None or request.n == request.best_of)
-                and not request.use_beam_search)
+        stream = (
+            request.stream
+            and (request.best_of is None or request.n == request.best_of)
+            and not request.use_beam_search
+        )
 
         def create_stream_response_json(
             index: int,
@@ -480,12 +502,13 @@ def main():
                 res: RequestOutput
                 for output in res.outputs:
                     i = output.index
-                    delta_text = output.text[len(previous_texts[i]):]
+                    delta_text = output.text[len(previous_texts[i]) :]
                     if request.logprobs is not None:
                         logprobs = create_logprobs(
-                            output.token_ids[previous_num_tokens[i]:],
-                            output.logprobs[previous_num_tokens[i]:],
-                            len(previous_texts[i]))
+                            output.token_ids[previous_num_tokens[i] :],
+                            output.logprobs[previous_num_tokens[i] :],
+                            len(previous_texts[i]),
+                        )
                     else:
                         logprobs = None
                     previous_texts[i] = output.text
@@ -497,8 +520,7 @@ def main():
                     )
                     yield f"data: {response_json}\n\n"
                     if output.finish_reason is not None:
-                        logprobs = (LogProbs()
-                                    if request.logprobs is not None else None)
+                        logprobs = LogProbs() if request.logprobs is not None else None
                         response_json = create_stream_response_json(
                             index=i,
                             text="",
@@ -510,8 +532,9 @@ def main():
 
         # Streaming response
         if stream:
-            return StreamingResponse(completion_stream_generator(),
-                                    media_type="text/event-stream")
+            return StreamingResponse(
+                completion_stream_generator(), media_type="text/event-stream"
+            )
 
         # Non-streaming response
         final_res: RequestOutput = None
@@ -519,8 +542,9 @@ def main():
             if await raw_request.is_disconnected():
                 # Abort the request if the client disconnects.
                 await engine.abort(request_id)
-                return create_error_response(HTTPStatus.BAD_REQUEST,
-                                            "Client disconnected")
+                return create_error_response(
+                    HTTPStatus.BAD_REQUEST, "Client disconnected"
+                )
             final_res = res
         assert final_res is not None
         choices = []
@@ -539,7 +563,8 @@ def main():
 
         num_prompt_tokens = len(final_res.prompt_token_ids)
         num_generated_tokens = sum(
-            len(output.token_ids) for output in final_res.outputs)
+            len(output.token_ids) for output in final_res.outputs
+        )
         usage = UsageInfo(
             prompt_tokens=num_prompt_tokens,
             completion_tokens=num_generated_tokens,
@@ -562,39 +587,37 @@ def main():
                 yield f"data: {response_json}\n\n"
                 yield "data: [DONE]\n\n"
 
-            return StreamingResponse(fake_stream_generator(),
-                                    media_type="text/event-stream")
+            return StreamingResponse(
+                fake_stream_generator(), media_type="text/event-stream"
+            )
 
         return response
 
     parser = argparse.ArgumentParser(
-        description="vLLM OpenAI-Compatible RESTful API server.")
-    parser.add_argument("--host",
-                        type=str,
-                        default="localhost",
-                        help="host name")
+        description="vLLM OpenAI-Compatible RESTful API server."
+    )
+    parser.add_argument("--host", type=str, default="localhost", help="host name")
     parser.add_argument("--port", type=int, default=8000, help="port number")
-    parser.add_argument("--allow-credentials",
-                        action="store_true",
-                        help="allow credentials")
-    parser.add_argument("--allowed-origins",
-                        type=json.loads,
-                        default=["*"],
-                        help="allowed origins")
-    parser.add_argument("--allowed-methods",
-                        type=json.loads,
-                        default=["*"],
-                        help="allowed methods")
-    parser.add_argument("--allowed-headers",
-                        type=json.loads,
-                        default=["*"],
-                        help="allowed headers")
-    parser.add_argument("--served-model-name",
-                        type=str,
-                        default=None,
-                        help="The model name used in the API. If not "
-                        "specified, the model name will be the same as "
-                        "the huggingface name.")
+    parser.add_argument(
+        "--allow-credentials", action="store_true", help="allow credentials"
+    )
+    parser.add_argument(
+        "--allowed-origins", type=json.loads, default=["*"], help="allowed origins"
+    )
+    parser.add_argument(
+        "--allowed-methods", type=json.loads, default=["*"], help="allowed methods"
+    )
+    parser.add_argument(
+        "--allowed-headers", type=json.loads, default=["*"], help="allowed headers"
+    )
+    parser.add_argument(
+        "--served-model-name",
+        type=str,
+        default=None,
+        help="The model name used in the API. If not "
+        "specified, the model name will be the same as "
+        "the huggingface name.",
+    )
 
     parser = AsyncEngineArgs.add_cli_args(parser)
     args = parser.parse_args()
@@ -620,17 +643,20 @@ def main():
     max_model_len = engine_model_config.max_model_len
 
     # A separate tokenizer to map token IDs to strings.
-    tokenizer = get_tokenizer(engine_args.tokenizer,
-                              tokenizer_mode=engine_args.tokenizer_mode,
-                              trust_remote_code=engine_args.trust_remote_code)
+    tokenizer = get_tokenizer(
+        engine_args.tokenizer,
+        tokenizer_mode=engine_args.tokenizer_mode,
+        trust_remote_code=engine_args.trust_remote_code,
+    )
 
     update_comment("ready=1")
-    uvicorn.run(app,
-                host=args.host,
-                port=args.port,
-                log_level="info",
-                timeout_keep_alive=TIMEOUT_KEEP_ALIVE)
-
+    uvicorn.run(
+        app,
+        host=args.host,
+        port=args.port,
+        log_level="info",
+        timeout_keep_alive=TIMEOUT_KEEP_ALIVE,
+    )
 
 
 if __name__ == "__main__":
