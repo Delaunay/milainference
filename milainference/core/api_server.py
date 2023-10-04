@@ -1,13 +1,11 @@
 # Adapted from
 # https://github.com/lm-sys/FastChat/blob/168ccc29d3f7edc50823016105c024fe2282732a/fastchat/serve/openai_api_server.py
 
-from .cli import update_comment
+from .metadata import update_comment
 
 
-def main():
-    import argparse
+def main(args):
     import asyncio
-    import json
     import time
     from http import HTTPStatus
     from typing import AsyncGenerator, Dict, List, Optional, Tuple, Union
@@ -593,35 +591,6 @@ def main():
 
         return response
 
-    parser = argparse.ArgumentParser(
-        description="vLLM OpenAI-Compatible RESTful API server."
-    )
-    parser.add_argument("--host", type=str, default="localhost", help="host name")
-    parser.add_argument("--port", type=int, default=8000, help="port number")
-    parser.add_argument(
-        "--allow-credentials", action="store_true", help="allow credentials"
-    )
-    parser.add_argument(
-        "--allowed-origins", type=json.loads, default=["*"], help="allowed origins"
-    )
-    parser.add_argument(
-        "--allowed-methods", type=json.loads, default=["*"], help="allowed methods"
-    )
-    parser.add_argument(
-        "--allowed-headers", type=json.loads, default=["*"], help="allowed headers"
-    )
-    parser.add_argument(
-        "--served-model-name",
-        type=str,
-        default=None,
-        help="The model name used in the API. If not "
-        "specified, the model name will be the same as "
-        "the huggingface name.",
-    )
-
-    parser = AsyncEngineArgs.add_cli_args(parser)
-    args = parser.parse_args()
-
     app.add_middleware(
         CORSMiddleware,
         allow_origins=args.allowed_origins,
@@ -659,5 +628,44 @@ def main():
     )
 
 
+
+def arguments(parser=None):
+    import argparse
+    import json
+
+    from vllm.engine.arg_utils import AsyncEngineArgs
+
+    if parser is None:
+        parser = argparse.ArgumentParser(
+            description="vLLM OpenAI-Compatible RESTful API server."
+        )
+
+    parser.add_argument("--host", type=str, default="localhost", help="host name")
+    parser.add_argument("--port", type=int, default=8000, help="port number")
+    parser.add_argument(
+        "--allow-credentials", action="store_true", help="allow credentials"
+    )
+    parser.add_argument(
+        "--allowed-origins", type=json.loads, default=["*"], help="allowed origins"
+    )
+    parser.add_argument(
+        "--allowed-methods", type=json.loads, default=["*"], help="allowed methods"
+    )
+    parser.add_argument(
+        "--allowed-headers", type=json.loads, default=["*"], help="allowed headers"
+    )
+    parser.add_argument(
+        "--served-model-name",
+        type=str,
+        default=None,
+        help="The model name used in the API. If not "
+        "specified, the model name will be the same as "
+        "the huggingface name.",
+    )
+
+    parser = AsyncEngineArgs.add_cli_args(parser)
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    main()
+    main(arguments())

@@ -33,4 +33,7 @@ def cli(*args, **kwargs):
 
 
 if __name__ == '__main__':
-    cli()
+    cli(
+        "milainfer",
+        description="Tool to help launching inference server"
+    )
