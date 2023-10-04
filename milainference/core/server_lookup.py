@@ -2,6 +2,8 @@ import subprocess
 import random
 import datetime
 
+
+from milainference.core.metadata import extract_output, parse_meta
 #
 #
 #
@@ -15,24 +17,6 @@ def _fetch_job_info(name):
     # Mock this for testing
     command = ["squeue", "-h", f"--name={name}", '--format="%A %j %T %P %U %k %N %L"']
     return subprocess.check_output(command, text=True)
-
-
-def extract_output(out):
-    return out.replace('"', "")
-
-
-def parse_meta(comment):
-    data = dict()
-    if comment != "(null)":
-        items = comment.split("|")
-        for kv in items:
-            try:
-                k, v = kv.split("=", maxsplit=1)
-                data[k] = v
-            except:
-                pass
-
-    return data
 
 
 def get_slurm_job_by_name(name):
