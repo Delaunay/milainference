@@ -68,17 +68,18 @@ class CommandRegistry:
             self.found_commands[cmd.name] = cmd
 
 
-def _discover_commands():
+def _discover_commands(module):
     """Discover all the commands we can find (plugins and built-in)"""
+
+    base = os.path.dirname(module.__file__)
+    name = module.__name__
+
     registry = CommandRegistry()
-
-    base = os.path.join(os.path.dirname(__file__), '..', 'core', 'commands')
-
-    fetch_factories(registry, "milainference.core.commands", base)
+    fetch_factories(registry, name, base)
 
     return registry
 
 
-def discover_commands():
-    return _discover_commands().found_commands
+def discover_commands(module):
+    return _discover_commands(module).found_commands
 

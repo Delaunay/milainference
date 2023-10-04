@@ -1,19 +1,27 @@
+import argparse
+
+import milainference.cli
+
 from milainference.args.discovery import discover_commands
 from milainference.args.argformat import HelpAction, HelpActionException
 
 
 
-def cli(*args, **kwargs):
-    import argparse
-
-    commands = discover_commands()
-
-    parser = argparse.ArgumentParser(*args, **kwargs, add_help=False)
-    parser.add_argument(
-        "-h", "--help", action=HelpAction, help="show this help message and exit"
+def main(*args, **kwargs):
+    parser = argparse.ArgumentParser(
+        *args, 
+        **kwargs, 
+        add_help=False,
     )
-    subparsers = parser.add_subparsers(dest="command")
+    parser.add_argument(
+        "-h", 
+        "--help", 
+        action=HelpAction, 
+        help="show this help message and exit",
+    )
 
+    subparsers = parser.add_subparsers(dest="command")
+    commands = discover_commands(milainference.cli)
     for cmd in commands.values():
         cmd.arguments(subparsers)
 
@@ -33,7 +41,7 @@ def cli(*args, **kwargs):
 
 
 if __name__ == '__main__':
-    cli(
+    main(
         "milainfer",
         description="Tool to help launching inference server"
     )

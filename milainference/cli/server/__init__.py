@@ -5,9 +5,9 @@ class Server(ParentCommand):
 
     @staticmethod
     def module():
-        import milainference.core.commands.server
+        import milainference.cli.server
 
-        return milainference.core.commands.server
+        return milainference.cli.server
 
 
 COMMANDS = Server
