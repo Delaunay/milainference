@@ -1,5 +1,3 @@
-
-
 from dataclasses import dataclass
 
 import openai
@@ -27,7 +25,6 @@ class Client(Command):
                 print(choices["text"])
         else:
             print(completion)
-
 
 
 COMMANDS = Client

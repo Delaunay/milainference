@@ -1,5 +1,3 @@
-
-
 from dataclasses import dataclass
 
 
@@ -23,8 +21,6 @@ class List(Command):
                 status = "READY  "
 
             print(f' - {status} {s["host"]}:{s["port"]} => {s["model"]}')
-
-
 
 
 COMMANDS = List

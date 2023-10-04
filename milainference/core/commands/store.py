@@ -1,10 +1,9 @@
-
-
 from dataclasses import dataclass
 import os
 
 from milainference.args.arguments import Command
 from milainference.core.metadata import job_metadata, _run
+
 
 def set_comment(comment: str):
     jobid = os.environ.get("SLURM_JOB_ID")
