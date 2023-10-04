@@ -5,9 +5,13 @@ import argparse
 import dataclasses
 import inspect
 import re
+import os
 import typing
 from dataclasses import MISSING, fields
 from typing import Any, get_type_hints
+
+import importlib
+import pkgutil
 
 from milainference.args.argformat import HelpAction
 
@@ -353,3 +357,89 @@ class Command:
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         self.execute(*args, **kwds)
+
+
+
+def discover_plugins(module):
+    """Discover plugins"""
+    path = module.__path__
+    name = module.__name__
+
+    plugins = {}
+
+    for _, name, _ in pkgutil.iter_modules(path, name + "."):
+        plugins[name] = importlib.import_module(name)
+
+    return plugins
+
+
+class ParentCommand(Command):
+    """Loads child module as subcommands"""
+
+    dispatch: dict = dict()
+
+    @staticmethod
+    def module():
+        return None
+
+    @staticmethod
+    def command_field():
+        return "subcommand"
+
+    @classmethod
+    def arguments(cls, subparsers):
+        parser = subparsers.add_parser(cls.name, description=cls.help(), add_help=False)
+        parser.add_argument(
+            "-h", "--help", action=HelpAction, help="show this help message and exit"
+        )
+        cls.shared_arguments(parser)
+        subparsers = parser.add_subparsers(
+            dest=cls.command_field(), help=cls.help()
+        )
+        cmds = cls.fetch_commands()
+        cls.register(cls, subparsers, cmds)
+
+    @classmethod
+    def shared_arguments(cls, subparsers):
+        pass
+
+    @classmethod
+    def fetch_commands(cls):
+        """Fetch commands using importlib, assume each command is inside its own module"""
+        all_commands = []
+        for _, module in discover_plugins(cls.module()).items():
+            file = module.__file__
+            _, tail = os.path.split(file)
+            cmdname = tail.replace('.py', '')
+
+            if hasattr(module, "COMMANDS"):
+                commandscls = getattr(module, "COMMANDS")
+
+                if not hasattr(commandscls, 'name'):
+                    commandscls.name = cmdname
+
+                if not isinstance(commandscls, list):
+                        commandscls = [commandscls]
+
+                all_commands.extend(commandscls)
+        
+        return all_commands
+
+    @staticmethod
+    def register(cls, subsubparsers, commands):
+        name = cls.module().__name__
+        for cmdcls in commands:
+            cmdcls.arguments(subsubparsers)
+
+            assert (name, cmdcls.name) not in cls.dispatch
+            cls.dispatch[(name, cmdcls.name)] = cmdcls()
+
+    def execute(self, args):
+        cmd = self.module().__name__
+        subcmd = vars(args).pop(self.command_field())
+
+        cmd = self.dispatch.get((cmd, subcmd), None)
+        if cmd:
+            return cmd.execute(args)
+
+        raise RuntimeError(f"Subcommand {self.name} {subcmd} is not defined")

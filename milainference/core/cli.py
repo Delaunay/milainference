@@ -20,7 +20,7 @@ def cli(*args, **kwargs):
     try:
         args, unknown = parser.parse_known_args()
         vars(args)["args"] = unknown
-    
+     
         cmd = vars(args).pop('command')
 
         if cmd is None:
