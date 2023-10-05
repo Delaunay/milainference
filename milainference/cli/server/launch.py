@@ -11,8 +11,8 @@ class Server(Command):
 
     @dataclass
     class Arguments:
-        model: str              # Model name to start
         path: str               # Path to model weights
+        model: str = None       # Model name to start
         sync: bool = False      # Wait for the server to start
 
     def execute(self, args):
@@ -25,10 +25,10 @@ class Server(Command):
 
         assert args.model != ""
 
-        cmd = [args.args] + [
+        cmd = args.args + [
             sbatch_script,
-                args.model,
-                args.path,
+            args.model,
+            args.path,
         ]
 
         code, _ = sbatch(cmd, sync=args.sync)

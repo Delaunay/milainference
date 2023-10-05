@@ -136,7 +136,7 @@ class ArgumentFormater(ArgumentFormaterBase):
         show_options = False
         choices = action.choices
         if choices is not None:
-            choices = f'Options: {", ".join(choices)}'
+            choices = f'Options: {", ".join(str(c) for c in choices)}'
             show_options = True
 
         if not help and choices is not None:

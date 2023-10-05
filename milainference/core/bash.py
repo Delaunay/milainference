@@ -8,7 +8,7 @@ def run(cmd):
 
 def popen(cmd, callback=None):
     def println(line):
-        print(line)
+        print(line, end="")
 
     if callback is None:
         callback=println
