@@ -39,6 +39,8 @@ if __name__ == "__main__":
             "milainference.core",
             "milainference.args",
             "milainference.cli",
+            "milainference.cli.server",
+            "milainference.cli.slurm",
             "milainference.plugins.example",
         ],
         setup_requires=["setuptools"],
