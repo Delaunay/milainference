@@ -23,30 +23,33 @@ class WaitFor(Command):
         start = time.time()
         newline = False
 
-        while not ready:
-            print(
-                f"\rWaiting on {len(servers)} servers for {time.time() - start:.2f}s",
-                end="",
-            )
-            newline = True
+        try:
+            while not ready:
+                print(
+                    f"\rWaiting on {len(servers)} servers for {time.time() - start:.2f}s",
+                    end="",
+                )
+                newline = True
 
-            for server in servers:
-                info = job_metadata(server["job_id"])
+                for server in servers:
+                    info = job_metadata(server["job_id"])
 
-                if info.get("ready", "0") == "1":
-                    ready = True
-                    selected_server = server
+                    if info.get("ready", "0") == "1":
+                        ready = True
+                        selected_server = server
+                        break
+
+                    if len(info) != 0:
+                        newlist.append(server)
+
+                time.sleep(1)
+                servers = newlist
+                newlist = []
+
+                if len(servers) == 0:
                     break
-
-                if len(info) != 0:
-                    newlist.append(server)
-
-            time.sleep(1)
-            servers = newlist
-            newlist = []
-
-            if len(servers) == 0:
-                break
+        except KeyboardInterrupt:
+            pass
 
         if newline:
             print()

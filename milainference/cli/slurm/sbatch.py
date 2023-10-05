@@ -25,8 +25,11 @@ def sbatch(args, sync=False, tags=None, **kwargs):
         update_tags(*tags, jobid=jobid)
 
     if jobid is not None and sync:
-        run(["touch", f"slurm-{jobid}.out"])
-        run(["tail", "-f", f"slurm-{jobid}.out"])
+        try:
+            run(["touch", f"slurm-{jobid}.out"])
+            run(["tail", "-f", f"slurm-{jobid}.out"])
+        except KeyboardInterrupt:
+            pass
         
     return code, jobid
 
