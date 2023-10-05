@@ -3,9 +3,10 @@ from dataclasses import dataclass
 
 from milainference.args.arguments import Command
 from milainference.core.bash import popen, run
+from milainference.core.metadata import update_tags
 
 
-def sbatch(args, sync=False, **kwargs):
+def sbatch(args, sync=False, tags=None, **kwargs):
     jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
     jobid = None
 
@@ -19,6 +20,9 @@ def sbatch(args, sync=False, **kwargs):
         print(line, end="")
 
     code = popen(['sbatch'] + args, readline)
+
+    if tags is not None and jobid is not None:
+        update_tags(*tags, jobid=jobid)
 
     if jobid is not None and sync:
         run(["touch", f"slurm-{jobid}.out"])

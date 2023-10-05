@@ -33,7 +33,12 @@ class Server(Command):
             "-e", args.env,
         ]
 
-        code, _ = sbatch(cmd, sync=args.sync)
+        tags = [
+            f"model={args.model}", 
+            "ready=0", 
+            "shared=y"
+        ]
+        code, _ = sbatch(cmd, sync=args.sync, tags=tags)
 
         return code
 

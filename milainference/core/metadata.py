@@ -38,8 +38,9 @@ def job_metadata(jobid=None):
     return meta
 
 
-def set_comment(comment: str):
-    jobid = os.environ.get("SLURM_JOB_ID")
+def set_comment(comment: str, jobid=None):
+    if jobid is None:
+        jobid = os.environ.get("SLURM_JOB_ID")
 
     command = [
         "scontrol",
@@ -52,8 +53,13 @@ def set_comment(comment: str):
     run(command)
 
 
-def update_comment(*metdata):
-    original = job_metadata()
+
+def update_tags(*tags, jobid=None):
+    return update_comment(*tags, jobid=jobid)
+
+
+def update_comment(*metdata, jobid=None):
+    original = job_metadata(jobid)
 
     for kv in metdata:
         k, v = kv.split("=")
@@ -64,5 +70,5 @@ def update_comment(*metdata):
         newcomment.append(f"{k}={v}")
     newcomment = "|".join(newcomment)
 
-    set_comment(newcomment)
+    set_comment(newcomment, jobid=jobid)
     print(newcomment)
