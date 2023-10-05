@@ -1,59 +1,42 @@
 import re
-import subprocess
+from dataclasses import dataclass
 
 from milainference.args.arguments import Command
+from milainference.core.bash import popen, run
 
-def _run(cmd):
-    # Mock this for testing
-    return subprocess.run(cmd)
+
+def sbatch(args, sync=False, **kwargs):
+    jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
+    jobid = None
+
+    def readline(line):
+        nonlocal jobid
+    
+        if match := jobid_regex.match(line):
+            data = match.groupdict()
+            jobid = data["jobid"]
+
+        print(line, end="")
+
+    code = popen(['sbatch' + args], readline)
+
+    if jobid is not None and sync:
+        run(["touch", f"slurm-{jobid}.out"])
+        run(["tail", "-f", f"slurm-{jobid}.out"])
+        
+    return code, jobid
 
 
 class Sbatch(Command):
     "Launch an inference server"
 
+    @dataclass
+    class Arguments:
+        sync: bool = False      # Wait for the server to start
+
     def execute(self, args):
-        if args.model is None:
-            args.model = list(filter(lambda s: len(s) != 0, args.path.split("/")))[-1]
-
-        assert args.model != ""
-
-        cmd = (
-            ["sbatch"]
-            + args.args
-        )
-
-        jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
-        jobid = None
-
-        with subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            shell=False,
-        ) as process:
-            try:
-                while process.poll() is None:
-                    process.stdout.flush()
-                    line = process.stdout.readline()
-                    if match := jobid_regex.match(line):
-                        data = match.groupdict()
-                        jobid = data["jobid"]
-
-                    print(line, end="")
-
-            except KeyboardInterrupt:
-                print("Stopping due to user interrupt")
-                process.kill()
-                return -1
-
-        if jobid is not None and args.sync:
-            _run(["touch", f"slurm-{jobid}.out"])
-            _run(["tail", "-f", f"slurm-{jobid}.out"])
-        else:
-            print(jobid)
-
-        return 0
+        code, _ = sbatch(args.args, sync=args.sync)
+        return code
 
 
 COMMANDS = Sbatch

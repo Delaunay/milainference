@@ -2,7 +2,8 @@ from dataclasses import dataclass
 import os
 
 from milainference.args.arguments import Command
-from milainference.core.metadata import job_metadata, _run
+from milainference.core.metadata import job_metadata
+from milainference.core.bash import run
 
 
 def set_comment(comment: str):
@@ -16,7 +17,7 @@ def set_comment(comment: str):
         f"comment={comment}",
     ]
 
-    _run(command)
+    run(command)
 
 
 def update_comment(*metdata):

@@ -1,10 +1,7 @@
 import os
 import subprocess
 
-
-def _run(cmd):
-    # Mock this for testing
-    return subprocess.run(cmd)
+from milainference.core.bash import run
 
 
 def extract_output(out):
@@ -52,7 +49,7 @@ def set_comment(comment: str):
         f"comment={comment}",
     ]
 
-    _run(command)
+    run(command)
 
 
 def update_comment(*metdata):

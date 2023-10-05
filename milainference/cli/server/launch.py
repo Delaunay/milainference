@@ -1,14 +1,9 @@
 from dataclasses import dataclass
-import re
-import subprocess
 
 import pkg_resources
 
 from milainference.args.arguments import Command
-
-def _run(cmd):
-    # Mock this for testing
-    return subprocess.run(cmd)
+from milainference.cli.slurm.sbatch import sbatch
 
 
 class Server(Command):
@@ -30,48 +25,15 @@ class Server(Command):
 
         assert args.model != ""
 
-        cmd = (
-            ["sbatch"]
-            + args.args
-            + [
-                sbatch_script,
+        cmd = [args.args] + [
+            sbatch_script,
                 args.model,
                 args.path,
-            ]
-        )
+        ]
 
-        jobid_regex = re.compile(r"Submitted batch job (?P<jobid>[0-9]*)")
-        jobid = None
+        code, _ = sbatch(cmd, sync=args.sync)
 
-        with subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            shell=False,
-        ) as process:
-            try:
-                while process.poll() is None:
-                    process.stdout.flush()
-                    line = process.stdout.readline()
-                    if match := jobid_regex.match(line):
-                        data = match.groupdict()
-                        jobid = data["jobid"]
-
-                    print(line, end="")
-
-            except KeyboardInterrupt:
-                print("Stopping due to user interrupt")
-                process.kill()
-                return -1
-
-        if jobid is not None and args.sync:
-            _run(["touch", f"slurm-{jobid}.out"])
-            _run(["tail", "-f", f"slurm-{jobid}.out"])
-        else:
-            print(jobid)
-
-        return 0
+        return code
 
 
 COMMANDS = Server
