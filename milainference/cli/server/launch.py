@@ -13,6 +13,7 @@ class Server(Command):
     class Arguments:
         model: str              # Model name to start
         path: str               # Path to model weights
+        env: str = "./env"
         sync: bool = False      # Wait for the server to start
 
     def execute(self, args):
@@ -27,8 +28,9 @@ class Server(Command):
 
         cmd = [args.args] + [
             sbatch_script,
-                args.model,
-                args.path,
+            "-m", args.model,
+            "-p", args.path,
+            "-e", args.env,
         ]
 
         code, _ = sbatch(cmd, sync=args.sync)
