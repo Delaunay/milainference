@@ -664,8 +664,8 @@ def arguments(parser=None):
     )
 
     parser = AsyncEngineArgs.add_cli_args(parser)
-    return parser.parse_args()
+    return parser
 
 
 if __name__ == "__main__":
-    main(arguments())
+    main(arguments().parse_args())

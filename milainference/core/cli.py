@@ -9,8 +9,8 @@ from milainference.args.argformat import HelpAction, HelpActionException
 
 def main(*args, **kwargs):
     parser = argparse.ArgumentParser(
-        *args, 
-        **kwargs, 
+        "milainfer",
+        description="Tool to help launching inference server",
         add_help=False,
     )
     parser.add_argument(
@@ -41,7 +41,4 @@ def main(*args, **kwargs):
 
 
 if __name__ == '__main__':
-    main(
-        "milainfer",
-        description="Tool to help launching inference server"
-    )
+    main()

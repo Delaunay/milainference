@@ -18,7 +18,7 @@ def sbatch(args, sync=False, **kwargs):
 
         print(line, end="")
 
-    code = popen(['sbatch' + args], readline)
+    code = popen(['sbatch'] + args, readline)
 
     if jobid is not None and sync:
         run(["touch", f"slurm-{jobid}.out"])
