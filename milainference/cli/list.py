@@ -10,7 +10,7 @@ class List(Command):
 
     @dataclass
     class Arguments:
-        model: str      # Model name to look for
+        model: str = None      # Model name to look for
 
     def execute(self, args):
         servers = get_inference_servers(args.model, pending_ok=True)
