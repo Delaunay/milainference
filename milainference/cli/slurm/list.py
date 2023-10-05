@@ -13,7 +13,7 @@ class List(Command):
         pass
 
     def execute(self, args):
-        return popen(["squeue", "-u", os.environ["USER"]])
+        return popen(["squeue", "-u", os.environ["USER"]] + args.args)
 
 
 COMMANDS = List
