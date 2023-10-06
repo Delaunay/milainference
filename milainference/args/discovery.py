@@ -2,6 +2,8 @@ import glob
 import os
 import traceback
 
+
+from milainference.args.cache import cache_to_local
 from milainference.args.argformat import HelpAction, HelpActionException
 
 
@@ -67,7 +69,11 @@ class CommandRegistry:
             ), f"Duplicate command name: {cmd.name}"
             self.found_commands[cmd.name] = cmd
 
+    def set_names(self):
+        for k, v in self.found_commands.items():
+            v.name = k
 
+@cache_to_local("commands")
 def _discover_commands(module):
     """Discover all the commands we can find (plugins and built-in)"""
 
@@ -77,6 +83,7 @@ def _discover_commands(module):
     registry = CommandRegistry()
     fetch_factories(registry, name, base)
 
+    registry.set_names()
     return registry
 
 

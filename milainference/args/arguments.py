@@ -358,6 +358,15 @@ class Command:
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         self.execute(*args, **kwds)
 
+    def __setstate__(self, state):
+        self.name = state["name"]
+        super().__setstate(state)
+
+    def __setstate__(self):
+        state = super().__getstate__()
+        state["name"] = self.name
+        return state
+
 
 
 def discover_plugins(module):
