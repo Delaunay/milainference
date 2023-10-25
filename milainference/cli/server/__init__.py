@@ -1,8 +1,10 @@
-from milainference.args.arguments import ParentCommand
+from argklass.command import ParentCommand
 
 
 class Server(ParentCommand):
     """Tools to help user launch and manage servers"""
+
+    name: str = "server"
 
     @staticmethod
     def module():

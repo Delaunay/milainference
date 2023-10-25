@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import os
 
-from milainference.args.arguments import Command
+from argklass.command import Command
 from milainference.core.metadata import job_metadata
 from milainference.core.bash import run
 
@@ -49,6 +49,7 @@ class Store(Command):
        milainfer store --update ready=1
 
     """
+    name: str = "store"
 
     @dataclass
     class Arguments:

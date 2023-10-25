@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 
 import openai
+from argklass.command import Command
 
-from milainference.args.arguments import Command
 from milainference.core.client import init_client
 
 
 class Client(Command):
     """Send an inference request to a server"""
+    name: str = "client"
 
     @dataclass
     class Arguments:

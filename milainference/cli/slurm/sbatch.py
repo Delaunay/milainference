@@ -1,7 +1,8 @@
 import re
 from dataclasses import dataclass
 
-from milainference.args.arguments import Command
+from argklass.command import Command
+
 from milainference.core.bash import popen, run
 from milainference.core.metadata import update_tags
 
@@ -36,6 +37,7 @@ def sbatch(args, sync=False, tags=None, **kwargs):
 
 class Sbatch(Command):
     "Launch an inference server"
+    name: str = "sbatch"
 
     @dataclass
     class Arguments:

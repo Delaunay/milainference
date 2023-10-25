@@ -1,14 +1,16 @@
 from dataclasses import dataclass
 
 import pkg_resources
+from argklass.command import Command
 
-from milainference.args.arguments import Command
 from milainference.cli.slurm.sbatch import sbatch
 
 
 class Server(Command):
     "Launch an inference server"
 
+    name: str = "launch"
+    
     @dataclass
     class Arguments:
         path: str               # Path to model weights

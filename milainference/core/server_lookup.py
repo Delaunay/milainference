@@ -108,9 +108,9 @@ def select_fields(job):
     return {
         "job_id": job["job_id"],
         "model": job["comment"].get("model"),
-        "host": job["comment"]["host"],
-        "port": job["comment"]["port"],
-        "ready": job["comment"]["ready"],
+        "host": job["comment"].get("host"),
+        "port": job["comment"].get("port"),
+        "ready": job["comment"].get("ready"),
     }
 
 

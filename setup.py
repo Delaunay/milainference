@@ -37,7 +37,6 @@ if __name__ == "__main__":
         ],
         packages=[
             "milainference.core",
-            "milainference.args",
             "milainference.cli",
             "milainference.cli.server",
             "milainference.cli.slurm",
@@ -50,10 +49,7 @@ if __name__ == "__main__":
             "openai",
             "simple_parsing",
             "rich",
-        ],
-        namespace_packages=[
-            "milainference",
-            "milainference.plugins",
+            "argklass"
         ],
         package_data={
             "milainference.data": [

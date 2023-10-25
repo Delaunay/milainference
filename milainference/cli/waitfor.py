@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 import time
 
-from milainference.args.arguments import Command
+from argklass.command import Command
 from milainference.core.server_lookup import get_inference_servers
 from milainference.core.metadata import job_metadata
 
@@ -49,6 +49,7 @@ def waitfor(servers):
 
 class WaitFor(Command):
     """Wait for a model to come online"""
+    name: str = "waitfor"
 
     @dataclass
     class Arguments:

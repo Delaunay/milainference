@@ -1,10 +1,12 @@
 import argparse
 
+
+from argklass.plugin import discover_module_commands
+from argklass.argformat import HelpAction, HelpActionException
+
+
 import milainference.cli
-
-from milainference.args.discovery import discover_commands
-from milainference.args.argformat import HelpAction, HelpActionException
-
+import milainference.plugins
 
 
 def main(*args, **kwargs):
@@ -21,7 +23,8 @@ def main(*args, **kwargs):
     )
 
     subparsers = parser.add_subparsers(dest="command")
-    commands = discover_commands(milainference.cli)
+    commands = discover_module_commands(milainference.cli, milainference.plugins).found_commands
+    
     for cmd in commands.values():
         cmd.arguments(subparsers)
 

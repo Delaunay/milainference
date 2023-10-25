@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 
 
-from milainference.args.arguments import Command
+from argklass.command import Command
 from milainference.core.server_lookup import get_inference_servers
 
 
 class List(Command):
     "List all inference server available"
+
+    name: str = "list"
 
     @dataclass
     class Arguments:

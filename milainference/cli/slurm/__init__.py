@@ -1,8 +1,10 @@
-from milainference.args.arguments import ParentCommand
+from argklass.command import ParentCommand
 
 
 class Slurm(ParentCommand):
     """Tools to interface with slurm"""
+
+    name: str = "slurm"
 
     @staticmethod
     def module():

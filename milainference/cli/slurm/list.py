@@ -1,12 +1,15 @@
 from dataclasses import dataclass
 import os
 
-from milainference.args.arguments import Command
+from argklass.command import Command
+
 from milainference.core.bash import popen
 
 
 class List(Command):
     "List user jobs"
+    
+    name: str = "list"
     
     @dataclass
     class Arguments:
