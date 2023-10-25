@@ -1,9 +1,10 @@
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 
 from argklass.command import Command
-from milainference.core.metadata import job_metadata
+
 from milainference.core.bash import run
+from milainference.core.metadata import job_metadata
 
 
 def set_comment(comment: str):
@@ -38,7 +39,7 @@ def update_comment(*metdata):
 
 class Store(Command):
     """Store slurm job metadata
-    
+
     Examples
     --------
 
@@ -49,11 +50,12 @@ class Store(Command):
        milainfer store --update ready=1
 
     """
+
     name: str = "store"
 
     @dataclass
     class Arguments:
-        update: bool = False    # Only update modified keys
+        update: bool = False  # Only update modified keys
 
     def execute(self, args):
         jobid = os.environ.get("SLURM_JOB_ID")

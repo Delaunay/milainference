@@ -11,8 +11,8 @@ def popen(cmd, callback=None):
         print(line, end="")
 
     if callback is None:
-        callback=println
-    
+        callback = println
+
     with subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
@@ -20,6 +20,7 @@ def popen(cmd, callback=None):
         text=True,
         shell=False,
     ) as process:
+
         def readoutput():
             process.stdout.flush()
             line = process.stdout.readline()

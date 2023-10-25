@@ -8,13 +8,14 @@ from milainference.core.client import init_client
 
 class Client(Command):
     """Send an inference request to a server"""
+
     name: str = "client"
 
     @dataclass
     class Arguments:
-        prompt: str             # Prompt
-        model: str = None       # Model Name
-        short: bool = False     # Only print the result and nothing else
+        prompt: str  # Prompt
+        model: str = None  # Model Name
+        short: bool = False  # Only print the result and nothing else
 
     def execute(self, args):
         model = init_client(args.model)

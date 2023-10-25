@@ -17,29 +17,16 @@ def main(args):
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import JSONResponse, StreamingResponse
     from packaging import version
-
     from vllm.engine.arg_utils import AsyncEngineArgs
     from vllm.engine.async_llm_engine import AsyncLLMEngine
     from vllm.entrypoints.openai.protocol import (
-        CompletionRequest,
-        CompletionResponse,
-        CompletionResponseChoice,
-        CompletionResponseStreamChoice,
-        CompletionStreamResponse,
-        ChatCompletionRequest,
-        ChatCompletionResponse,
-        ChatCompletionResponseChoice,
-        ChatCompletionResponseStreamChoice,
-        ChatCompletionStreamResponse,
-        ChatMessage,
-        DeltaMessage,
-        ErrorResponse,
-        LogProbs,
-        ModelCard,
-        ModelList,
-        ModelPermission,
-        UsageInfo,
-    )
+        ChatCompletionRequest, ChatCompletionResponse,
+        ChatCompletionResponseChoice, ChatCompletionResponseStreamChoice,
+        ChatCompletionStreamResponse, ChatMessage, CompletionRequest,
+        CompletionResponse, CompletionResponseChoice,
+        CompletionResponseStreamChoice, CompletionStreamResponse, DeltaMessage,
+        ErrorResponse, LogProbs, ModelCard, ModelList, ModelPermission,
+        UsageInfo)
     from vllm.logger import init_logger
     from vllm.outputs import RequestOutput
     from vllm.sampling_params import SamplingParams
@@ -626,7 +613,6 @@ def main(args):
         log_level="info",
         timeout_keep_alive=TIMEOUT_KEEP_ALIVE,
     )
-
 
 
 def arguments(parser=None):

@@ -40,6 +40,7 @@ if __name__ == "__main__":
             "milainference.cli",
             "milainference.cli.server",
             "milainference.cli.slurm",
+            "milainference.pytorch",
             "milainference.plugins.example",
         ],
         setup_requires=["setuptools"],
@@ -49,7 +50,7 @@ if __name__ == "__main__":
             "openai",
             "simple_parsing",
             "rich",
-            "argklass"
+            "argklass",
         ],
         package_data={
             "milainference.data": [
@@ -60,5 +61,5 @@ if __name__ == "__main__":
             "console_scripts": [
                 "milainfer = milainference.core.cli:main",
             ],
-        }
+        },
     )

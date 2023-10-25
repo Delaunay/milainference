@@ -3,7 +3,6 @@ import os
 
 import importlib_resources
 
-
 _datapath = importlib_resources.files("milainference.data")
 _namespaces = None
 

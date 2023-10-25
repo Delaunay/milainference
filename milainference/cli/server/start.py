@@ -1,15 +1,14 @@
-
-from argklass.command import Command
 from argklass.argformat import HelpAction
+from argklass.command import Command
 
-from milainference.core.api_server import main, arguments
+from milainference.core.api_server import arguments, main
 
 
 class Start(Command):
     """Start an inference server"""
-    
+
     name: str = "start"
-    
+
     @classmethod
     def arguments(cls, subparsers):
         """Define the arguments of this command"""

@@ -53,7 +53,6 @@ def set_comment(comment: str, jobid=None):
     run(command)
 
 
-
 def update_tags(*tags, jobid=None):
     return update_comment(*tags, jobid=jobid)
 

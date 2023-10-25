@@ -13,14 +13,14 @@ def sbatch(args, sync=False, tags=None, **kwargs):
 
     def readline(line):
         nonlocal jobid
-    
+
         if match := jobid_regex.match(line):
             data = match.groupdict()
             jobid = data["jobid"]
 
         print(line, end="")
 
-    code = popen(['sbatch'] + args, readline)
+    code = popen(["sbatch"] + args, readline)
 
     if tags is not None and jobid is not None:
         update_tags(*tags, jobid=jobid)
@@ -31,7 +31,7 @@ def sbatch(args, sync=False, tags=None, **kwargs):
             run(["tail", "-f", f"slurm-{jobid}.out"])
         except KeyboardInterrupt:
             pass
-        
+
     return code, jobid
 
 
@@ -41,7 +41,7 @@ class Sbatch(Command):
 
     @dataclass
     class Arguments:
-        sync: bool = False      # Wait for the server to start
+        sync: bool = False  # Wait for the server to start
 
     def execute(self, args):
         code, _ = sbatch(args.args, sync=args.sync)

@@ -1,9 +1,9 @@
-import subprocess
-import random
 import datetime
-
+import random
+import subprocess
 
 from milainference.core.metadata import extract_output, parse_meta
+
 #
 #
 #

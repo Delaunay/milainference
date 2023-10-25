@@ -1,11 +1,10 @@
-
-
-from dataclasses import dataclass
 import time
+from dataclasses import dataclass
 
 from argklass.command import Command
-from milainference.core.server_lookup import get_inference_servers
+
 from milainference.core.metadata import job_metadata
+from milainference.core.server_lookup import get_inference_servers
 
 
 def waitfor(servers):
@@ -15,7 +14,7 @@ def waitfor(servers):
     newlist = []
     start = time.time()
     newline = False
-    
+
     while not ready:
         print(
             f"\rWaiting on {len(servers)} servers for {time.time() - start:.2f}s",
@@ -49,11 +48,12 @@ def waitfor(servers):
 
 class WaitFor(Command):
     """Wait for a model to come online"""
+
     name: str = "waitfor"
 
     @dataclass
     class Arguments:
-        model: str = None   # Model name
+        model: str = None  # Model name
 
     def execute(self, args):
         servers = get_inference_servers(args.model, pending_ok=True)
