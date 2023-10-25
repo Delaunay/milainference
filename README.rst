@@ -41,7 +41,7 @@ Examples
    salloc ....
 
    # Launch a server (launch a slurm job and exit)
-   milainfer server --path /network/weights/llama.var/llama2/Llama-2-7b-chat-hf/
+   milainfer server launch --model Llama-2-7b-chat-hf /network/weights/llama.var/llama2/Llama-2-7b-chat-hf --sync --time=00:30:00
 
    # List all the available inference servers
    milainfer list

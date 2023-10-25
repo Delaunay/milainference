@@ -2,12 +2,14 @@ import os
 import subprocess
 from dataclasses import dataclass
 
-from milainference.args.arguments import Command
+from argklass.command import Command
 from milainference.core.bash import popen
 
 
 class Cancel(Command):
     "Cancel jobs"
+
+    name: str = "cancel"
 
     @dataclass
     class Arguments:
